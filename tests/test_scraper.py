@@ -8,7 +8,7 @@ class TestScraper(unittest.TestCase):
         string = "Volume 7, numéro 20, 2020"
         response = Scraper.extract_issue(string)
 
-        #self.assertEqual(len(response.keys()), 3)
+        self.assertEqual(len(response.keys()), 3)
 
         self.assertEqual(response["volume"], "7")
         self.assertEqual(response["number"], "20")
