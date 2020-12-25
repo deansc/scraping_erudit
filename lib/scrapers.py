@@ -70,9 +70,9 @@ class ArticleScraper(Scraper):
         return dateparser.parse(aa.p.text.split(": ")[-1])
 
     def get_issue_data(self):
-        #aa = [i for i in self.soup.find_all("div", {"class": "doc-head__metadata"})][1]
+        # aa = [i for i in self.soup.find_all("div", {"class": "doc-head__metadata"})][1]
         aa = [i for i in self.soup.find_all("p", {"class": "refpapier"})][0]
-        #return list(aa.children)[:-1]
+        # return list(aa.children)[:-1]
         return aa.text
 
 
@@ -127,9 +127,9 @@ class RevueScraper(Scraper):
             self.model.issues.append(scraper.model)
 
             scraper.model.revue = self.model
-            scraper.model.volume = iss['volume']
-            scraper.model.number = iss['number']
-            scraper.model.year = iss['year']
+            scraper.model.volume = iss["volume"]
+            scraper.model.number = iss["number"]
+            scraper.model.year = iss["year"]
 
             yield scraper
 

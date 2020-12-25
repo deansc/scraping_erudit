@@ -34,7 +34,6 @@ class TestScraper(unittest.TestCase):
         self.assertEqual(response["year"], "2008")
         self.assertEqual(response["pages"], "5-183")
 
-
     def test_extract_issue_when_pages_messed_up(self):
         string = "Volume 7, Numéro 2, 2020, p. 1–20Fenêtre ouverte sur la médiation de la musique"
         response = Scraper.extract_issue(string)
