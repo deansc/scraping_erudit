@@ -1,3 +1,4 @@
+import dateparser
 import re
 import urllib.request as urllib2
 import vcr
@@ -43,6 +44,17 @@ class ArticleScraper(Scraper):
     DOI_PATH = "https://doi.org/"
     model = Article()
 
+    def scrap_and_assign(self):
+        self.model.authors = self.get_authors()
+        self.model.title = self.get_title()
+        self.model.doi = self.get_doi()
+        self.model.date = self.get_date()
+        self.model.authors = self.get_authors()
+        # print(self.get_title())
+        # print(self.get_doi())
+        # print(self.get_date())
+        # print(self.get_issue_data())
+
     def get_authors(self):
         return [" ".join(li.span.text.split()) for li in self.soup.find_all("li", {"class": "doc-head__author"})]
 
@@ -55,7 +67,7 @@ class ArticleScraper(Scraper):
 
     def get_date(self):
         aa = [i for i in self.soup.find_all("div", {"class": "doc-head__metadata"})][0]
-        return aa.p.text.split(": ")[-1]
+        return dateparser.parse(aa.p.text.split(": ")[-1])
 
     def get_issue_data(self):
         #aa = [i for i in self.soup.find_all("div", {"class": "doc-head__metadata"})][1]
@@ -64,9 +76,13 @@ class ArticleScraper(Scraper):
         return aa.text
 
 
-
 class IssueScraper(Scraper):
     model = Issue()
+
+    def scrap_and_assign(self):
+        for article_scraper in self.get_articles_scrapers():
+            article_scraper.scrap_and_assign()
+            break
 
     def get_articles_scrapers(self):
         for li in self._extract_articles_html():
@@ -78,6 +94,9 @@ class IssueScraper(Scraper):
             cassette_name = "rmo/issue-" + f"{iss['volume']}-{iss['number']}-{iss['year']}" + "/" + article
 
             scraper = ArticleScraper(url=url, cassette_name=cassette_name)
+            self.model.articles.append(scraper.model)
+            scraper.model.issue = self.model
+
             yield scraper
 
     def get_issue_number(self):
@@ -91,6 +110,11 @@ class IssueScraper(Scraper):
 class RevueScraper(Scraper):
     model = Revue()
 
+    def scrap_and_assign(self):
+        for issue_scraper in self.get_issue_scrapers():
+            issue_scraper.scrap_and_assign()
+            break
+
     def get_issue_scrapers(self):
         for li in self._extract_issues_html():
             url = PathConfig.ERUDIT_PATH + li.a["href"]
@@ -100,6 +124,13 @@ class RevueScraper(Scraper):
             cassette_name = "rmo/issue-" + f"{iss['volume']}-{iss['number']}-{iss['year']}"
 
             scraper = IssueScraper(url=url, cassette_name=cassette_name)
+            self.model.issues.append(scraper.model)
+
+            scraper.model.revue = self.model
+            scraper.model.volume = iss['volume']
+            scraper.model.number = iss['number']
+            scraper.model.year = iss['year']
+
             yield scraper
 
     def _extract_issues_html(self):
