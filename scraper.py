@@ -12,6 +12,7 @@ if __name__ == "__main__":
             print(article_scraper.get_authors())
             print(article_scraper.get_title())
             print(article_scraper.get_doi())
-            print(article_scraper.get_head())
+            print(article_scraper.get_date())
+            print(article_scraper.get_issue_data())
             break
         break

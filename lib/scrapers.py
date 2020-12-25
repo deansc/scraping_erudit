@@ -34,8 +34,8 @@ class Scraper:
                 to_return["number"] = list(re.findall(r"\d+", i))[0]
             if re.match(r".*(19|20)\d\d", i):
                 to_return["year"] = list(re.findall(r"\d+", i))[0]
-            if re.match(r"p\. \d+-\d+", i):
-                to_return["pages"] = list(re.findall(r"\d+-\d+", i))[0]
+            if re.match(r"p\..+\d+.{1}\d+.*", i):
+                to_return["pages"] = list(re.findall(r"\d+.{1}\d+", i))[0]
         return to_return
 
 
@@ -53,9 +53,16 @@ class ArticleScraper(Scraper):
         aa = [li for li in self.soup.find_all("span", {"class": "hint--top hint--no-animate"})][-1]
         return aa.a["href"].replace(self.DOI_PATH, "")
 
-    def get_head(self):
+    def get_date(self):
         aa = [i for i in self.soup.find_all("div", {"class": "doc-head__metadata"})][0]
         return aa.p.text.split(": ")[-1]
+
+    def get_issue_data(self):
+        #aa = [i for i in self.soup.find_all("div", {"class": "doc-head__metadata"})][1]
+        aa = [i for i in self.soup.find_all("p", {"class": "refpapier"})][0]
+        #return list(aa.children)[:-1]
+        return aa.text
+
 
 
 class IssueScraper(Scraper):
