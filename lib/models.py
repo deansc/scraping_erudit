@@ -25,3 +25,18 @@ class Article:
     pages: str = None
     url: str = None
     doi: str = None
+
+    def __str__(self):
+        return str(self.__repr__())
+
+    def __repr__(self):
+        return {
+            "title": self.title,
+            "authors": self.authors,
+            "pages": self.pages,
+            "doi": self.doi,
+            "url": self.url,
+            "volume": self.issue.volume,
+            "number": self.issue.number,
+            "year": self.issue.year,
+        }

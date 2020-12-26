@@ -35,8 +35,8 @@ class Scraper:
                 to_return["number"] = list(re.findall(r"\d+", i))[0]
             if re.match(r".*(19|20)\d\d", i):
                 to_return["year"] = list(re.findall(r"\d+", i))[0]
-            if re.match(r"p\..+\d+.{1}\d+.*", i):
-                to_return["pages"] = list(re.findall(r"\d+.{1}\d+", i))[0]
+            if re.match(r"p\..+[0-9a-z]+.{1}[0-9a-z]+.*", i):
+                to_return["pages"] = list(re.findall(r"[0-9a-z]+.{1}[0-9a-z]+", i))[0]
         return to_return
 
 
@@ -59,7 +59,8 @@ class ArticleScraper(Scraper):
         return [" ".join(li.span.text.split()) for li in self.soup.find_all("li", {"class": "doc-head__author"})]
 
     def get_title(self):
-        return [li.span.text for li in self.soup.find_all("h1", {"class": "doc-head__title"})][0]
+        title = [li.span.text for li in self.soup.find_all("h1", {"class": "doc-head__title"})][0]
+        return " ".join(title.split())
 
     def get_doi(self):
         aa = [li for li in self.soup.find_all("span", {"class": "hint--top hint--no-animate"})][-1]
@@ -82,7 +83,6 @@ class IssueScraper(Scraper):
     def scrap_and_assign(self):
         for article_scraper in self.get_articles_scrapers():
             article_scraper.scrap_and_assign()
-            break
 
     def get_articles_scrapers(self):
         for li in self._extract_articles_html():
@@ -94,13 +94,19 @@ class IssueScraper(Scraper):
             cassette_name = "rmo/issue-" + f"{iss['volume']}-{iss['number']}-{iss['year']}" + "/" + article
 
             scraper = ArticleScraper(url=url, cassette_name=cassette_name)
+            scraper.model = Article()  # fix: not sure how not to do this
             self.model.articles.append(scraper.model)
             scraper.model.issue = self.model
+            scraper.model.pages = self.get_pages(li)
 
             yield scraper
 
     def get_issue_number(self):
         return self.soup.find_all("span", {"class": "issue-number"})[0].text
+
+    def get_pages(self, li):
+        a = [i for i in li.find_all("p", {"class": "bib-record__pages"})][0]
+        return list(re.findall(r"[0-9a-z]+.{1}[0-9a-z]+", a.text))[0]
 
     def _extract_articles_html(self):
         for li in self.soup.find_all("li", {"class": "bib-record"}):
@@ -113,7 +119,6 @@ class RevueScraper(Scraper):
     def scrap_and_assign(self):
         for issue_scraper in self.get_issue_scrapers():
             issue_scraper.scrap_and_assign()
-            break
 
     def get_issue_scrapers(self):
         for li in self._extract_issues_html():
@@ -124,6 +129,7 @@ class RevueScraper(Scraper):
             cassette_name = "rmo/issue-" + f"{iss['volume']}-{iss['number']}-{iss['year']}"
 
             scraper = IssueScraper(url=url, cassette_name=cassette_name)
+            scraper.model = Issue()  # fix: not sure how not to do this
             self.model.issues.append(scraper.model)
 
             scraper.model.revue = self.model
