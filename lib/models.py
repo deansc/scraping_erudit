@@ -5,15 +5,41 @@ from datetime import datetime
 @dataclass
 class Revue:
     issues: list = field(default_factory=list)
+    title: str = None
+
+    def issues_count(self):
+        return len(self.issues)
+
+    def __str__(self):
+        return str(self.__repr__())
+
+    def __repr__(self):
+        return {
+            "title": self.title,
+            "issues": self.issues_count(),
+        }
 
 
 @dataclass
 class Issue:
     revue: Revue = None
     articles: list = field(default_factory=list)
+    title: str = None
     volume: str = None
     number: str = None
     year: str = None
+
+    def articles_count(self):
+        return len(self.articles)
+
+    def __str__(self):
+        return str(self.__repr__())
+
+    def __repr__(self):
+        return {
+            "title": self.title,
+            "articles": self.articles_count(),
+        }
 
 
 @dataclass

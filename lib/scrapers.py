@@ -96,10 +96,14 @@ class IssueScraper(Scraper):
             scraper = ArticleScraper(url=url, cassette_name=cassette_name)
             scraper.model = Article()  # fix: not sure how not to do this
             self.model.articles.append(scraper.model)
+            self.model.title = self.get_title()
             scraper.model.issue = self.model
             scraper.model.pages = self.get_pages(li)
 
             yield scraper
+
+    def get_title(self):
+        return self.soup.find_all("span", {"class": "theme-title"})[0].text.strip()
 
     def get_issue_number(self):
         return self.soup.find_all("span", {"class": "issue-number"})[0].text

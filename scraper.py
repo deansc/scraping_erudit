@@ -8,5 +8,6 @@ if __name__ == "__main__":
     revue = revue_scraper.model
 
     for issue in revue.issues:
+        # print(issue)
         for article in issue.articles:
             print(article)
