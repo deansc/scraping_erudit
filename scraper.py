@@ -1,14 +1,18 @@
 import csv
+import argparse
 
 from lib.config import PathConfig
 from lib.scrapers import RevueScraper
 from lib.wikidata import WikidataRow
 
 if __name__ == "__main__":
-    revue = "rmo"
-    url = PathConfig.back_issues_url(revue)
+    parser = argparse.ArgumentParser(description="Process script args")
+    parser.add_argument("-r", "--revue", required=True)
+    args = parser.parse_args()
 
-    revue_scraper = RevueScraper(revue=revue, url=url, cassette_name="back-issues")
+    url = PathConfig.back_issues_url(args.revue)
+
+    revue_scraper = RevueScraper(revue=args.revue, url=url, cassette_name="back-issues")
     revue_scraper.scrap_and_assign()
     revue = revue_scraper.model
 
