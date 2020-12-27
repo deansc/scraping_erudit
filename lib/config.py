@@ -1,4 +1,7 @@
 class PathConfig:
     ERUDIT_PATH = "https://www.erudit.org"
-    RMO_URL = ERUDIT_PATH + "/fr/revues/rmo/"
-    RMO_ISSUES_URL = RMO_URL + "#back-issues"
+    REVUE_URL = ERUDIT_PATH + "/fr/revues"
+
+    @staticmethod
+    def back_issues_url(revue):
+        return f"{PathConfig.REVUE_URL}/{revue}/#back-issues"

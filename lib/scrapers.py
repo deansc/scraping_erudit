@@ -10,14 +10,15 @@ from lib.models import Article, Issue, Revue
 
 
 class Scraper:
-    def __init__(self, url, cassette_name):
+    def __init__(self, revue, url, cassette_name):
+        self.revue = revue
         self.url = url
         self.cassette_name = cassette_name
 
         self.soup = self.get_soup()
 
     def get_soup(self):
-        with vcr.use_cassette(f"fixtures/vcr_cassettes/{self.cassette_name}.yaml", record_mode="once"):
+        with vcr.use_cassette(f"fixtures/vcr_cassettes/{self.revue}/{self.cassette_name}.yaml", record_mode="once"):
             response = urllib2.urlopen(self.url).read()
             return BeautifulSoup(response, "html.parser")
 
@@ -91,9 +92,9 @@ class IssueScraper(Scraper):
             article = [i for i in url.split("/") if i != ""][-1]
 
             iss = self.extract_issue(issue)
-            cassette_name = "rmo/issue-" + f"{iss['volume']}-{iss['number']}-{iss['year']}" + "/" + article
+            cassette_name = "issue-" + f"{iss['volume']}-{iss['number']}-{iss['year']}" + "/" + article
 
-            scraper = ArticleScraper(url=url, cassette_name=cassette_name)
+            scraper = ArticleScraper(revue=self.revue, url=url, cassette_name=cassette_name)
             scraper.model = Article()  # fix: not sure how not to do this
             self.model.articles.append(scraper.model)
             self.model.title = self.get_title()
@@ -130,9 +131,9 @@ class RevueScraper(Scraper):
             issue = li.span.text
 
             iss = self.extract_issue(issue)
-            cassette_name = "rmo/issue-" + f"{iss['volume']}-{iss['number']}-{iss['year']}"
+            cassette_name = "issue-" + f"{iss['volume']}-{iss['number']}-{iss['year']}"
 
-            scraper = IssueScraper(url=url, cassette_name=cassette_name)
+            scraper = IssueScraper(revue=self.revue, url=url, cassette_name=cassette_name)
             scraper.model = Issue()  # fix: not sure how not to do this
             self.model.issues.append(scraper.model)
 
