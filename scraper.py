@@ -6,7 +6,7 @@ from lib.scrapers import RevueScraper
 from lib.wikidata import WikidataRow
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Process script args")
+    parser = argparse.ArgumentParser(description="Scrap Erudit metadata articles")
     parser.add_argument("-r", "--revue", required=True)
     args = parser.parse_args()
 
@@ -29,6 +29,6 @@ if __name__ == "__main__":
                 list_of_list.append(row_to_write)
                 print(row_to_write)
 
-    with open("output.csv", "w", newline="") as myfile:
+    with open(f"fixtures/csv_outputs/{args.revue}_articles.csv", "w", newline="") as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
         wr.writerows(list_of_list)
