@@ -1,0 +1,9 @@
+SELECT ?article ?articleLabel ?doi WHERE {
+  ?article wdt:P31 wd:{{ revue_qid }};
+    wdt:P1433 wd:Q47523513 .
+  ?article wdt:P356 ?doi.
+
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "fr,en".
+  }
+}
