@@ -44,3 +44,16 @@ class TestScraper(unittest.TestCase):
         self.assertEqual(response["number"], "2")
         self.assertEqual(response["year"], "2020")
         self.assertEqual(response["pages"], "1–20")
+
+    def test_generate_cassette_prefix(self):
+        prefix = Scraper.generate_cassette_prefix(year="2323", volume="1", number="44")
+        self.assertEqual(prefix, "issue-44-1-2323")
+
+        prefix = Scraper.generate_cassette_prefix(year="2323", volume="1", number=None)
+        self.assertEqual(prefix, "issue-1-2323")
+
+        prefix = Scraper.generate_cassette_prefix(year="2323", volume=None, number="44")
+        self.assertEqual(prefix, "issue-44-2323")
+
+        prefix = Scraper.generate_cassette_prefix(year="2323", volume=None, number=None)
+        self.assertEqual(prefix, "issue-2323")

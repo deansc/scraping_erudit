@@ -23,6 +23,12 @@ class Scraper:
             return BeautifulSoup(response, "html.parser")
 
     @staticmethod
+    def generate_cassette_prefix(year, volume=None, number=None):
+        prefix = f"{volume}-{year}" if volume else year
+        prefix = f"{number}-{prefix}" if number else prefix
+        return "issue-" + prefix
+
+    @staticmethod
     def extract_issue(string):
         """
         input: Volume 7, numéro 2, 2020
@@ -92,7 +98,10 @@ class IssueScraper(Scraper):
             article = [i for i in url.split("/") if i != ""][-1]
 
             iss = self.extract_issue(issue)
-            cassette_name = "issue-" + f"{iss['volume']}-{iss['number']}-{iss['year']}" + "/" + article
+            cassette_prefix = self.generate_cassette_prefix(
+                volume=iss.get("volume"), number=iss.get("number"), year=iss.get("year")
+            )
+            cassette_name = cassette_prefix + "/" + article
 
             scraper = ArticleScraper(revue=self.revue, url=url, cassette_name=cassette_name)
             scraper.model = Article()  # fix: not sure how not to do this
@@ -131,7 +140,9 @@ class RevueScraper(Scraper):
             issue = li.span.text
 
             iss = self.extract_issue(issue)
-            cassette_name = "issue-" + f"{iss['volume']}-{iss['number']}-{iss['year']}"
+            cassette_name = self.generate_cassette_prefix(
+                volume=iss.get("volume"), number=iss.get("number"), year=iss.get("year")
+            )
 
             scraper = IssueScraper(revue=self.revue, url=url, cassette_name=cassette_name)
             scraper.model = Issue()  # fix: not sure how not to do this
