@@ -19,5 +19,4 @@ black -l120 -tpy37 .
 Run the script:
 ```
 python scraper.py -r <revue_string>
-python mapper.py -r <revue_string> -q <articles_by_issue>
 ```

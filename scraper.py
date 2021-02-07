@@ -23,11 +23,11 @@ if __name__ == "__main__":
     for issue in revue.issues:
         # print(issue)
         for article in issue.articles:
-            if len(article.authors) == 1:  # TODO: in the future we process authors separately
-                w = WikidataRow(article=article)
-                row_to_write = w.get_row()
-                list_of_list.append(row_to_write)
-                print(row_to_write)
+            w = WikidataRow(article=article)
+            row_to_write = w.get_row()
+            list_of_list.append(row_to_write)
+            # print(row_to_write)
+            print(article)
 
     with open(f"fixtures/csv_outputs/{args.revue}_articles.csv", "w", newline="") as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)

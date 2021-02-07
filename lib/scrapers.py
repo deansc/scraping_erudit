@@ -10,6 +10,8 @@ from lib.models import Article, Issue, Revue
 
 
 class Scraper:
+    REGEXP_PAGES = r"[0-9a-z]+.{1}[0-9a-z]+"
+
     def __init__(self, revue, url, cassette_name):
         self.revue = revue
         self.url = url
@@ -43,7 +45,7 @@ class Scraper:
             if re.match(r".*(19|20)\d\d", i):
                 to_return["year"] = list(re.findall(r"\d+", i))[0]
             if re.match(r"p\..+[0-9a-z]+.{1}[0-9a-z]+.*", i):
-                to_return["pages"] = list(re.findall(r"[0-9a-z]+.{1}[0-9a-z]+", i))[0]
+                to_return["pages"] = list(re.findall(Scraper.REGEXP_PAGES, i))[0]
         return to_return
 
 
@@ -53,7 +55,7 @@ class ArticleScraper(Scraper):
 
     def scrap_and_assign(self):
         self.model.authors = self.get_authors()
-        self.model.title = self.get_title()
+        self.model.title_alt = self.get_title()
         self.model.doi = self.get_doi()
         self.model.date = self.get_date()
         self.model.authors = self.get_authors()
@@ -94,6 +96,7 @@ class IssueScraper(Scraper):
     def get_articles_scrapers(self):
         for li in self._extract_articles_html():
             url = PathConfig.ERUDIT_PATH + li.h6.a["href"]
+            article_title = li.h6.a.text.strip()
             issue = self.get_issue_number()
             article = [i for i in url.split("/") if i != ""][-1]
 
@@ -107,8 +110,10 @@ class IssueScraper(Scraper):
             scraper.model = Article()  # fix: not sure how not to do this
             self.model.articles.append(scraper.model)
             self.model.title = self.get_title()
+
             scraper.model.issue = self.model
             scraper.model.pages = self.get_pages(li)
+            scraper.model.title = article_title
 
             yield scraper
 
@@ -119,8 +124,12 @@ class IssueScraper(Scraper):
         return self.soup.find_all("span", {"class": "issue-number"})[0].text
 
     def get_pages(self, li):
+        """
+        Return None when no pages
+        """
         a = [i for i in li.find_all("p", {"class": "bib-record__pages"})][0]
-        return list(re.findall(r"[0-9a-z]+.{1}[0-9a-z]+", a.text))[0]
+        pages = re.findall(self.REGEXP_PAGES, a.text)
+        return next(iter(pages), None)
 
     def _extract_articles_html(self):
         for li in self.soup.find_all("li", {"class": "bib-record"}):
@@ -149,9 +158,9 @@ class RevueScraper(Scraper):
             self.model.issues.append(scraper.model)
 
             scraper.model.revue = self.model
-            scraper.model.volume = iss["volume"]
-            scraper.model.number = iss["number"]
-            scraper.model.year = iss["year"]
+            scraper.model.volume = iss.get("volume")
+            scraper.model.number = iss.get("number")
+            scraper.model.year = iss.get("year")
 
             yield scraper
 

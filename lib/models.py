@@ -48,6 +48,7 @@ class Article:
     authors: list = field(default_factory=list)
     date: datetime = None
     title: str = None
+    title_alt: str = None
     pages: str = None
     url: str = None
     doi: str = None
@@ -58,6 +59,7 @@ class Article:
     def __repr__(self):
         return {
             "title": self.title,
+            "title_alt": self.title_alt,
             "authors": self.authors,
             "pages": self.pages,
             "doi": self.doi,
